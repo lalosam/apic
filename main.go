@@ -4,14 +4,15 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
-	"rojosam.com/api/glueapi"
+	"rojosam.com/apic/glueapi"
 )
 
 var (
-	port = flag.String("port", "8080", "port")
+	port = flag.String("port", "9090", "port")
 )
 
 /*
@@ -24,6 +25,7 @@ curl -I 'localhost:8080/api/v1/status' -H "x-auth-token: admin"
 curl -I 'localhost:8080/api/v1/status' -H "x-auth-token: notadmin"
 */
 func main() {
+	log.SetOutput(os.Stdout)
 	flag.Parse()
 	var router = mux.NewRouter()
 	var api = router.PathPrefix("/api").Subrouter()
