@@ -1,0 +1,67 @@
+table.listing {
+    border: 1px solid #ddd;
+    border-collapse: collapse;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+table.listing td, th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+table.listing th {
+    height: 50px;
+    text-align: center;
+    vertical-align: middle;
+    color: rgb(255, 255, 255);
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: #4CAF50;
+}
+
+table.listing tr:nth-child(even){background-color: #f2f2f2;}
+
+table.listing tr:hover {background-color: #adf;}
+
+
+table.struct {
+    border: 1px solid #ddd;
+    border-collapse: collapse;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+tr:nth-child(odd) td.property_name {
+    text-align: right;
+    border: 1px solid #ddd;
+    color: rgb(255, 255, 255);
+    background-color: #4CAF50;
+    padding: 8px;
+}
+
+tr:nth-child(even) td.property_name {
+    text-align: right;
+    border: 1px solid #ddd;
+    color: rgb(255, 255, 255);
+    background-color: rgb(104, 207, 107);
+    padding: 8px;
+}
+
+tr:nth-child(odd) td.property_value {
+    text-align: right;
+    border: 1px solid #ddd;
+    color: black;
+    background-color: white;
+    padding: 8px;
+}
+
+tr:nth-child(even) td.property_value {
+    text-align: right;
+    border: 1px solid #ddd;
+    color: black;
+    background-color: #f2f2f2;;
+    padding: 8px;
+}
+
+table.struct tr:hover td.property_value {background-color: #adf;}
+
+

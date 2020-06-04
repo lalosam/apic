@@ -29,25 +29,28 @@ func main() {
 	flag.Parse()
 	var router = mux.NewRouter()
 	var api = router.PathPrefix("/api").Subrouter()
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	api.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	})
-	api.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.Header.Get("x-auth-token") != "admin" {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-			log.Println(r.RequestURI)
-			next.ServeHTTP(w, r)
-		})
-	})
+
+	//api.Use(func(next http.Handler) http.Handler {
+	//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	//		if r.Header.Get("x-auth-token") != "admin" {
+	//			w.WriteHeader(http.StatusUnauthorized)
+	//			return
+	//		}
+	//		log.Println(r.RequestURI)
+	//		next.ServeHTTP(w, r)
+	//	})
+	//})
+
 	var api1 = api.PathPrefix("/v1").Subrouter()
 	api1.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 	api1.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusForbidden)
+		w.WriteHeader(http.StatusNotFound)
 	})
 
 	glueapi.Handlers(api1.PathPrefix("/glue/").Subrouter())
