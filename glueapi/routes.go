@@ -1,7 +1,6 @@
 package glueapi
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -58,10 +57,12 @@ func getJobsDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func getJobDetail(w http.ResponseWriter, r *http.Request) {
+	accept := r.Header.Get("Accept")
 	log.Println("Get Job Detail")
 	c := NewClient()
 	vars := mux.Vars(r)
 	jobDetail := c.GetJobDetail(vars["name"])
-	enc := json.NewEncoder(w)
-	enc.Encode(*jobDetail)
+	apiccore.Encode(w, accept, *jobDetail, "DIV")
+	//enc := json.NewEncoder(w)
+	//enc.Encode(*jobDetail)
 }

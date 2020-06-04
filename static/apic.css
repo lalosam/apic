@@ -1,7 +1,14 @@
+body {
+    background-color: rgba(255, 255, 255, 0.993);
+    font-size: ;
+  }
+
 table.listing {
     border: 1px solid #ddd;
     border-collapse: collapse;
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 table.listing td, th {
@@ -17,17 +24,51 @@ table.listing th {
     padding-top: 12px;
     padding-bottom: 12px;
     background-color: #4CAF50;
+    font-weight: bold;
 }
 
 table.listing tr:nth-child(even){background-color: #f2f2f2;}
 
+table.listing tr:nth-child(odd){background-color: #ffffff;}
+
 table.listing tr:hover {background-color: #adf;}
 
+.div_struct_table {
+    display: inline-block;
+    border: 3px solid rgb(9, 119, 51);
+    margin-left: 15px;
+    margin-bottom: 30px;
+    margin-top: 50px;
+}
+
+.div_slice_table {
+    border: 3px solid rgb(9, 119, 51);
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-top: 10px;
+    align-content: center;
+    text-align: center;
+}
+
+.div_slice_nodata{
+    border: 3px solid rgb(9, 119, 51);
+    margin-left: 100px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 100px;
+    padding: 10px;
+    color: rgb(9,119,51);
+    text-align: center;
+    vertical-align: middle;
+    font-size: x-large;
+    font-weight: 200;
+}
 
 table.struct {
     border: 1px solid #ddd;
     border-collapse: collapse;
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    width: 450px;
 }
 
 tr:nth-child(odd) td.property_name {
@@ -36,6 +77,11 @@ tr:nth-child(odd) td.property_name {
     color: rgb(255, 255, 255);
     background-color: #4CAF50;
     padding: 8px;
+}
+
+tr td.property_name {
+    font-weight: bold;
+    width: 30%;
 }
 
 tr:nth-child(even) td.property_name {
@@ -58,10 +104,27 @@ tr:nth-child(even) td.property_value {
     text-align: right;
     border: 1px solid #ddd;
     color: black;
-    background-color: #f2f2f2;;
+    background-color: #f2f2f2;
     padding: 8px;
 }
 
 table.struct tr:hover td.property_value {background-color: #adf;}
+
+.slice_item {
+    /* border-top:    1px solid  #ff0;
+    border-right:  2px dashed #f0F; 
+    border-bottom: 3px dashed rgb(9, 119, 51);
+    border-left:   3px solid  #09f;
+    border-bottom: 3px solid rgb(9, 119, 51);*/
+    padding: 8px;
+    margin-top: 15px;
+    background-color: rgb(255, 255, 255);
+}
+
+table {
+    font-size: small;
+}
+
+
 
 

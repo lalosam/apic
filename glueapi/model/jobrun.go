@@ -9,12 +9,12 @@ import (
 
 //JobRun internal Glue Job Run model
 type JobRun struct {
-	ID              string
 	Status          string
-	StartedOn       time.Time
+	ID              string
+	StartedOn       string
 	ExecutionTime   int64
 	ErrorMessage    string
-	LogURL          string
+	LogURL          string `html:"elem:href@Log"`
 	MaxCapacity     float64
 	WorkerType      string
 	NumberOfWorkers int64
@@ -39,7 +39,7 @@ func (j *JobRun) SetStatus(status *string) *JobRun {
 //SetStartedOn setter
 func (j *JobRun) SetStartedOn(startedOn *time.Time) *JobRun {
 	if startedOn != nil {
-		j.StartedOn = *startedOn
+		j.StartedOn = startedOn.String()
 	}
 	return j
 }

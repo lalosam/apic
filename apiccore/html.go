@@ -7,9 +7,15 @@ import (
 	"strings"
 )
 
+type element struct {
+	elementType string
+	elementName string
+}
+
 type htmlTag struct {
 	layout string
-	style  string
+	style  map[string]string
+	elem   element
 }
 
 //ToHTML return HTML representation of the given object
@@ -49,6 +55,10 @@ func processObject(obj interface{}, tag string, buff *strings.Builder) {
 	}
 }
 
+func processString(s string, t htmlTag, buff *strings.Builder) {
+
+}
+
 func processStruct(obj interface{}, tag string, buff *strings.Builder) {
 	valueO := reflect.ValueOf(obj)
 	typeO := reflect.TypeOf(obj)
@@ -60,21 +70,20 @@ func processStruct(obj interface{}, tag string, buff *strings.Builder) {
 		for i := 0; i < typeO.NumField(); i++ {
 			buff.WriteString("<td>")
 			htmlTag := parseTag(typeO.Field(i).Tag.Get("html"))
-			log.Println(htmlTag)
 			processObject(valueO.Field(i).Interface(), htmlTag.layout, buff)
 			buff.WriteString("</td>")
 		}
 		buff.WriteString("</tr>")
 	case "TABLE":
-		buff.WriteString("<div style=\"overflow-x:auto;\"><table class=\"struct\">")
+		buff.WriteString("<div style=\"overflow-x:auto;\" class=\"div_struct_table\"><table class=\"struct\">")
 		buff.WriteString("<tbody>")
 		for i := 0; i < typeO.NumField(); i++ {
 			ft := typeO.Field(i)
 			buff.WriteString("<tr><td class=\"property_name\">")
-			buff.WriteString(ft.Name)
+			buff.WriteString(ft.Name + ":")
 			buff.WriteString("</td><td class=\"property_value\">")
 			htmlTag := parseTag(typeO.Field(i).Tag.Get("html"))
-			log.Println(htmlTag)
+			//log.Println(htmlTag)
 			processObject(valueO.Field(i).Interface(), htmlTag.layout, buff)
 			buff.WriteString("</td></tr>")
 		}
@@ -96,43 +105,26 @@ func processSlice(obj interface{}, tag string, buff *strings.Builder) {
 		}
 		buff.WriteString("</div>")
 	case "TABLE":
-		buff.WriteString("<div style=\"overflow-x:auto;\"><table class=\"listing\">")
 		if value.Len() > 0 {
+			buff.WriteString("<div class=\"div_slice_table\" style=\"overflow-x:auto;\"><table class=\"listing\">")
 			headers := getTableHeaders(value.Index(0).Interface())
 			buff.WriteString(headers)
+			buff.WriteString("<tbody>")
+			for i := 0; i < value.Len(); i++ {
+				processObject(value.Index(i).Interface(), "ROW", buff)
+			}
+			buff.WriteString("</tbody>")
+			buff.WriteString("</table></div>")
+		} else {
+			buff.WriteString("<div class=\"div_slice_nodata\">")
+			buff.WriteString("No Data")
+			buff.WriteString("</div>")
 		}
-		buff.WriteString("<tbody>")
-		for i := 0; i < value.Len(); i++ {
-			processObject(value.Index(i).Interface(), "ROW", buff)
-		}
-		buff.WriteString("</tbody>")
-		buff.WriteString("</table></div>")
 	}
-}
-
-func convertToHTML(obj interface{}, openTag string, closeTag string, buffer *strings.Builder) {
-	value := reflect.ValueOf(obj)
-	kind := value.Kind()
-	buffer.WriteString(openTag)
-	switch kind {
-	case reflect.Slice:
-		buffer.WriteString("<table>")
-		if value.Len() > 0 {
-			headers := getTableHeaders(value.Index(0).Interface())
-			buffer.WriteString(headers)
-		}
-		for i := 0; i < value.Len(); i++ {
-			convertToHTML(value.Index(i), "<tr>", "</tr>", buffer)
-		}
-		buffer.WriteString("</table>")
-	case reflect.Struct:
-		buffer.WriteString("<td>STRUCT</td")
-	}
-	buffer.WriteString(closeTag)
 }
 
 func parseTag(tag string) htmlTag {
-	log.Printf("Processing html tag [%s]\n", tag)
+	//log.Printf("Processing html tag [%s]\n", tag)
 	var res = htmlTag{}
 	for _, param := range strings.Split(tag, ";") {
 		keyvalue := strings.Split(param, ":")
