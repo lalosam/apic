@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"rojosam.com/apic/glueapi"
+	"rojosam.com/apic/s3api"
 )
 
 var (
@@ -54,6 +55,7 @@ func main() {
 	})
 
 	glueapi.Handlers(api1.PathPrefix("/glue/").Subrouter())
+	s3api.Handlers(api1.PathPrefix("/s3/").Subrouter())
 
 	srv := &http.Server{
 		Handler: router,

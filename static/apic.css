@@ -1,6 +1,6 @@
 body {
     background-color: rgba(255, 255, 255, 0.993);
-    font-size: ;
+    font-size: small;
   }
 
 table.listing {
@@ -9,6 +9,10 @@ table.listing {
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     margin-left: auto;
     margin-right: auto;
+    width: 100%;
+    table-layout: fixed;
+    white-space: normal;
+    word-wrap: break-word;
 }
 
 table.listing td, th {

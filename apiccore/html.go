@@ -16,6 +16,7 @@ type htmlTag struct {
 	layout string
 	style  map[string]string
 	elem   element
+	width  string
 }
 
 //ToHTML return HTML representation of the given object
@@ -23,15 +24,16 @@ func ToHTML(obj interface{}, tag string) string {
 	log.Println("Generating HTML:")
 	var html strings.Builder
 	html.WriteString("<html><head>\n")
+	html.WriteString("<meta http-equiv=\"refresh\" content=\"180\">")
 	html.WriteString("<link rel=\"stylesheet\" href=\"/static/apic.css\">")
 	html.WriteString("</head><body>\n")
-	processObject(obj, tag, &html)
+	processObject(obj, htmlTag{layout: tag}, &html)
 	html.WriteString("\n</body>")
 	html.WriteString("\n</html>")
 	return html.String()
 }
 
-func processObject(obj interface{}, tag string, buff *strings.Builder) {
+func processObject(obj interface{}, tag htmlTag, buff *strings.Builder) {
 	valueO := reflect.ValueOf(obj)
 	kind := valueO.Kind()
 	switch kind {
@@ -45,7 +47,7 @@ func processObject(obj interface{}, tag string, buff *strings.Builder) {
 		log.Printf("Processing PTR, TAG:[%s]", tag)
 		processObject(valueO.Elem().Interface(), tag, buff)
 	case reflect.String:
-		buff.WriteString(valueO.String())
+		processString(valueO.String(), tag, buff)
 	case reflect.Int64:
 		buff.WriteString(fmt.Sprintf("%d", valueO.Int()))
 	case reflect.Float64:
@@ -56,13 +58,32 @@ func processObject(obj interface{}, tag string, buff *strings.Builder) {
 }
 
 func processString(s string, t htmlTag, buff *strings.Builder) {
-
+	log.Printf("Processing a String TAG[%v]\n", t)
+	if t.elem.elementType == "href" {
+		buff.WriteString("<a href=\"")
+		buff.WriteString(s)
+		buff.WriteString("\">")
+		buff.WriteString(t.elem.elementName)
+		buff.WriteString("</a>")
+	} else if t.style != nil {
+		if val, ok := t.style[s]; ok {
+			buff.WriteString("<div style=\"")
+			buff.WriteString(val)
+			buff.WriteString("\">")
+			buff.WriteString(s)
+			buff.WriteString("</div>")
+		} else {
+			buff.WriteString(s)
+		}
+	} else {
+		buff.WriteString(s)
+	}
 }
 
-func processStruct(obj interface{}, tag string, buff *strings.Builder) {
+func processStruct(obj interface{}, tag htmlTag, buff *strings.Builder) {
 	valueO := reflect.ValueOf(obj)
 	typeO := reflect.TypeOf(obj)
-	switch tag {
+	switch tag.layout {
 	case "DIV":
 	case "ROW":
 		log.Printf("Processing Struct Row, TAG:[%s] Fields:[%d]", tag, typeO.NumField())
@@ -70,7 +91,7 @@ func processStruct(obj interface{}, tag string, buff *strings.Builder) {
 		for i := 0; i < typeO.NumField(); i++ {
 			buff.WriteString("<td>")
 			htmlTag := parseTag(typeO.Field(i).Tag.Get("html"))
-			processObject(valueO.Field(i).Interface(), htmlTag.layout, buff)
+			processObject(valueO.Field(i).Interface(), htmlTag, buff)
 			buff.WriteString("</td>")
 		}
 		buff.WriteString("</tr>")
@@ -80,11 +101,11 @@ func processStruct(obj interface{}, tag string, buff *strings.Builder) {
 		for i := 0; i < typeO.NumField(); i++ {
 			ft := typeO.Field(i)
 			buff.WriteString("<tr><td class=\"property_name\">")
-			buff.WriteString(ft.Name + ":")
+			buff.WriteString(SplitByUpper(ft.Name) + ":")
 			buff.WriteString("</td><td class=\"property_value\">")
 			htmlTag := parseTag(typeO.Field(i).Tag.Get("html"))
 			//log.Println(htmlTag)
-			processObject(valueO.Field(i).Interface(), htmlTag.layout, buff)
+			processObject(valueO.Field(i).Interface(), htmlTag, buff)
 			buff.WriteString("</td></tr>")
 		}
 		buff.WriteString("</tbody>")
@@ -93,14 +114,14 @@ func processStruct(obj interface{}, tag string, buff *strings.Builder) {
 
 }
 
-func processSlice(obj interface{}, tag string, buff *strings.Builder) {
+func processSlice(obj interface{}, tag htmlTag, buff *strings.Builder) {
 	value := reflect.ValueOf(obj)
-	switch tag {
+	switch tag.layout {
 	case "DIV":
 		buff.WriteString("<div class=\"slice_main\" style=\"overflow-x:auto;\">")
 		for i := 0; i < value.Len(); i++ {
 			buff.WriteString("<div class=\"slice_item\" style=\"overflow-x:auto;\">")
-			processObject(value.Index(i).Interface(), "ROW", buff)
+			processObject(value.Index(i).Interface(), htmlTag{layout: "ROW"}, buff)
 			buff.WriteString("</div>")
 		}
 		buff.WriteString("</div>")
@@ -111,7 +132,7 @@ func processSlice(obj interface{}, tag string, buff *strings.Builder) {
 			buff.WriteString(headers)
 			buff.WriteString("<tbody>")
 			for i := 0; i < value.Len(); i++ {
-				processObject(value.Index(i).Interface(), "ROW", buff)
+				processObject(value.Index(i).Interface(), htmlTag{layout: "ROW"}, buff)
 			}
 			buff.WriteString("</tbody>")
 			buff.WriteString("</table></div>")
@@ -131,6 +152,20 @@ func parseTag(tag string) htmlTag {
 		switch keyvalue[0] {
 		case "layout":
 			res.layout = keyvalue[1]
+		case "elem":
+			e := strings.Split(keyvalue[1], "@")
+			res.elem = element{e[0], e[1]}
+		case "style":
+			m := map[string]string{}
+			for _, condition := range strings.Split(keyvalue[1], "|") {
+				log.Println(condition)
+				keyvalueCondition := strings.Split(condition, "@")
+				log.Println(keyvalueCondition)
+				m[keyvalueCondition[0]] = strings.ReplaceAll(strings.ReplaceAll(keyvalueCondition[1], "$$", ";"), "$", ":")
+			}
+			res.style = m
+		case "width":
+			res.width = keyvalue[1]
 		}
 	}
 	return res
@@ -149,8 +184,15 @@ func getTableHeaders(obj interface{}) string {
 		b.WriteString("<thead><tr>")
 		for i := 0; i < typeO.NumField(); i++ {
 			ft := typeO.Field(i)
-			b.WriteString("<th>")
-			b.WriteString(ft.Name)
+			htmlTag := parseTag(typeO.Field(i).Tag.Get("html"))
+			style := ""
+			if htmlTag.width != "" {
+				style = fmt.Sprintf("style=\"width:%s\"", htmlTag.width)
+			}
+			b.WriteString("<th ")
+			b.WriteString(style)
+			b.WriteString(">")
+			b.WriteString(SplitByUpper(ft.Name))
 			b.WriteString("</th>")
 		}
 		b.WriteString("</tr></thead>")

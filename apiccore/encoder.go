@@ -19,6 +19,7 @@ func Encode(w http.ResponseWriter, accept string, i interface{}, htmlLayout stri
 			w.Header().Set("Content-Type", "application/json")
 			enc := json.NewEncoder(w)
 			enc.Encode(i)
+			processed = true
 		case "text/html":
 			log.Println("HTML")
 			w.Header().Set("Content-Type", "text/html")

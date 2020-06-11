@@ -9,15 +9,15 @@ import (
 
 //JobRun internal Glue Job Run model
 type JobRun struct {
-	Status          string
-	ID              string
-	StartedOn       string
-	ExecutionTime   int64
-	ErrorMessage    string
-	LogURL          string `html:"elem:href@Log"`
-	MaxCapacity     float64
-	WorkerType      string
-	NumberOfWorkers int64
+	Status          string  `html:"style:SUCCEEDED@color$green$$font-weight$bold|RUNNING@color$blue$$font-weight$bold|FAILED@color$red$$font-weight$bold|STOPPED@text-decoration$line-through$$font-weight$bold;width:5%"`
+	ID              string  `html:"width:30%"`
+	StartedOn       string  `html:"width:15%"`
+	ExecutionTime   int64   `html:"width:7%"`
+	ErrorMessage    string  `html:"width:22%"`
+	Log             string  `html:"elem:href@Log;width:3%"`
+	MaxCapacity     float64 `html:"width:6%"`
+	WorkerType      string  `html:"width:6%"`
+	NumberOfWorkers int64   `html:"width:6%"`
 }
 
 //SetID setter
@@ -60,10 +60,10 @@ func (j *JobRun) SetErrorMessage(errorMessage *string) *JobRun {
 	return j
 }
 
-//SetLogURL setter
-func (j *JobRun) SetLogURL(id *string) *JobRun {
+//SetLog setter
+func (j *JobRun) SetLog(id *string) *JobRun {
 	if id != nil {
-		j.LogURL = fmt.Sprintf("https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2#logsV2:log-groups/log-group/$252Faws-glue$252Fjobs$252Flogs-v2$3FlogStreamNameFilter$3D%s", *id)
+		j.Log = fmt.Sprintf("https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2#logsV2:log-groups/log-group/$252Faws-glue$252Fjobs$252Flogs-v2/log-events/%s-driver?filterPattern$3D$253F$2522DataLakeGlueJob$253A$2522", *id)
 	}
 	return j
 }
@@ -101,7 +101,7 @@ func (j *JobRun) SetGlueJobRun(jobRun *glue.JobRun) *JobRun {
 	j.SetStartedOn(jobRun.StartedOn)
 	j.SetExecutionTime(jobRun.ExecutionTime)
 	j.SetErrorMessage(jobRun.ErrorMessage)
-	j.SetLogURL(jobRun.Id)
+	j.SetLog(jobRun.Id)
 	j.SetMaxCapacity(jobRun.MaxCapacity)
 	j.SetWorkerType(jobRun.WorkerType)
 	j.SetNumberOfWorkers(jobRun.NumberOfWorkers)

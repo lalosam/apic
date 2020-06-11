@@ -1,17 +1,19 @@
 package model
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/service/glue"
 )
 
 //Job internal Glue Job model
 type Job struct {
-	Name            string
-	WorkerType      string
-	NumberOfWorkers int64
-	MaxCapacity     float64
+	Name            string  `html:"width:15%"`
+	WorkerType      string  `html:"width:5%"`
+	NumberOfWorkers int64   `html:"width:8%"`
+	MaxCapacity     float64 `html:"width:7%"`
+	GlueVersion     string  `html:"width:5%"`
+	JarPaths        string  `html:"width:60%"`
 }
 
 //SetName setter
@@ -48,19 +50,30 @@ func (j *Job) SetMaxCapacity(maxCapacity *float64) *Job {
 	return j
 }
 
+//SetGlueVersion setter
+func (j *Job) SetGlueVersion(glueVersion *string) *Job {
+	if glueVersion != nil {
+		j.GlueVersion = *glueVersion
+	}
+	return j
+}
+
+//SetJarPaths setter
+func (j *Job) SetJarPaths(jarPaths *string) *Job {
+	if jarPaths != nil {
+		j.JarPaths = *jarPaths
+	}
+	return j
+}
+
 //SetGlueJob setter
 func (j *Job) SetGlueJob(glueJob *glue.Job) *Job {
 	j.SetName(glueJob.Name)
 	j.SetWorkerType(glueJob.WorkerType)
 	j.SetNumberOfWorkers(glueJob.NumberOfWorkers)
 	j.SetMaxCapacity(glueJob.MaxCapacity)
+	j.SetGlueVersion(glueJob.GlueVersion)
+	j.SetJarPaths(glueJob.DefaultArguments["--extra-jars"])
+	log.Println(glueJob.DefaultArguments)
 	return j
-}
-
-func (j *Job) String() string {
-	return fmt.Sprintf("%s, %s, %d, %f", j.Name, j.WorkerType, j.NumberOfWorkers, j.MaxCapacity)
-}
-
-func (J *Job) ToHtml() string {
-	return ""
 }
